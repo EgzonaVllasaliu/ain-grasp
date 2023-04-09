@@ -128,8 +128,6 @@ function greedyRandomizedSolution(contributors, projects) {
   // Calculate the score of the solution and store it in the solution object
   solution.score = getSolutionScore(solution, projects);
 
-  console.log(solution.score);
-
   // Return the solution object
   return solution;
 }
