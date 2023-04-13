@@ -170,26 +170,25 @@ function localSearch(solution, contributors, projects) {
 }
 
 function getSolutionScore(solution, projects) {
-  // Initialize a variable to store the score
   let score = 0;
 
-  // Create a Set of assigned project names using the assignments array of the solution object
   const assignedProjects = new Set(
     solution.assignments.map((a) => a.project.name)
   );
 
-  // Iterate through each project and add its score to the total score if it has been assigned,
-  // or subtract its bestBefore value from the total score if it has not been assigned
   for (const project of projects) {
     if (assignedProjects.has(project.name)) {
-      // The project has been assigned, so add its score to the total score
-      score += project.score;
+      if (project.roles.length === 0) {
+        // The project has been assigned, and all roles are filled, so add its score to the total score
+        score += project.score;
+      } else {
+        // The project has been assigned, but not all roles are filled, so subtract its bestBefore value from the total score
+        score -= project.bestBefore;
+      }
     } else {
-      // The project has not been assigned, so subtract its bestBefore value from the total score
       score -= project.bestBefore;
     }
   }
-  // Return the total score
   return score;
 }
 
@@ -221,27 +220,28 @@ function assignContributorToProject(contributor, project) {
 }
 
 function grasp(contributors, projects, iterations) {
-  // Initialize a bestSolution object with an empty assignments array and a score of -Infinity
   let bestSolution = {
     assignments: [],
     score: -Infinity,
   };
 
-  // Run the GRASP algorithm for the specified number of iterations
   for (let i = 0; i < iterations; i++) {
-    // Generate an initial solution using the greedyRandomizedSolution function
     let solution = greedyRandomizedSolution(contributors, projects);
-
-    // Refine the solution using the localSearch function
     solution = localSearch(solution, contributors, projects);
 
-    // Update the bestSolution object if the score of the new solution is better than the current best score
-    if (solution.score > bestSolution.score) {
+    let allRolesFilled = true;
+    for (const project of projects) {
+      if (project.roles.length > 0) {
+        allRolesFilled = false;
+        break;
+      }
+    }
+
+    if (allRolesFilled && solution.score > bestSolution.score) {
       bestSolution = solution;
     }
   }
 
-  // Return the best solution found during the iterations
   return bestSolution;
 }
 
