@@ -108,7 +108,7 @@ function main(input) {
     }
   }
 
-  const fun = (seed) => {
+  const findSolutions = (seed) => {
     const skill0 = skill.map((row) => row.slice());
     const ts0 = ts.slice();
 
@@ -224,20 +224,40 @@ function main(input) {
   let score = -1;
   let sol;
   let T = 10000;
-  while (T--) {
-    const [sc, so] = fun(T);
+
+  function runIteration() {
+    if (Date.now() >= endTime) {
+      const output =
+        sol.length +
+        "\n" +
+        sol
+          .map(
+            ([p, cs]) => Pnames[p] + "\n" + cs.map((c) => Cnames[c]).join(" ")
+          )
+          .join("\n");
+      writeOutput(output);
+      return;
+    }
+
+    const [sc, so] = findSolutions(T);
     if (sc > score) {
       score = sc;
       sol = so;
     }
+
+    setTimeout(runIteration, 0);
   }
 
-  let output = sol.length + "\n";
+  const endTime = Date.now() + 5 * 60 * 1000; // Run for 5 minutes
+  setTimeout(() => {
+    const output =
+      sol.length +
+      "\n" +
+      sol
+        .map(([p, cs]) => Pnames[p] + "\n" + cs.map((c) => Cnames[c]).join(" "))
+        .join("\n");
+    writeOutput(output);
+  }, 5 * 60 * 1000);
 
-  for (const [p, cs] of sol) {
-    output += Pnames[p] + "\n";
-    output += cs.map((c) => Cnames[c]).join(" ") + "\n";
-  }
-
-  writeOutput(output);
+  runIteration();
 }

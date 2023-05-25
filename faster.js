@@ -125,22 +125,30 @@ function quality(solution, projects) {
   );
 }
 // Modify the grasp function to use memoGetRightDevs and optimize quality comparison
-function grasp(devs, projects, p = 0.5, maxIterations = 100) {
+function grasp(
+  devs,
+  projects,
+  p = 0.5,
+  maxIterations = 100,
+  duration = 300000
+) {
   let bestSolution = null;
   let bestQuality = -Infinity;
   let iteration = 0;
 
-  // Calculate the number of projects to consider
   const numProjectsToConsider = Math.ceil(projects.length * p);
+  const startTime = Date.now();
+  const endTime = startTime + duration;
 
-  while (iteration < maxIterations) {
+  function runIteration() {
+    if (iteration >= maxIterations || Date.now() >= endTime) {
+      return;
+    }
+
     let candidateSolution = [];
     let remainingProjects = [...projects];
 
-    // Shuffle the remaining projects to randomize the selection
     remainingProjects.sort(() => Math.random() - 0.5);
-
-    // Consider only the first 'numProjectsToConsider' projects
     const projectsToConsider = remainingProjects.slice(
       0,
       numProjectsToConsider
@@ -172,7 +180,7 @@ function grasp(devs, projects, p = 0.5, maxIterations = 100) {
       );
     }
 
-    const localSearchSolution = optimizeSimplified([...devs], [...projects]); // Optimize the quality comparison
+    const localSearchSolution = optimizeSimplified([...devs], [...projects]);
     const candidateQuality = quality(candidateSolution, projects);
     const localSearchQuality = quality(localSearchSolution, projects);
 
@@ -186,7 +194,11 @@ function grasp(devs, projects, p = 0.5, maxIterations = 100) {
     }
 
     iteration++;
+
+    setTimeout(runIteration, 0);
   }
+
+  runIteration();
 
   return bestSolution;
 }
