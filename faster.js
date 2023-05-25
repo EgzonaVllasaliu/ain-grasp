@@ -209,7 +209,7 @@ const index = function () {
   const max_iterations = process.argv[4];
   const { devs, projects } = getStructure(fileName);
   const projectsCompleted = grasp(devs, projects, p, max_iterations);
-  writeResult(projectsCompleted, fileName + "txt.out.txt");
+  writeResult(projectsCompleted, fileName + ".out.txt");
 };
 
 index();
